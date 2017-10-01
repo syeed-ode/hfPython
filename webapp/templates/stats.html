@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<h2>{{ the_title }}</h2>
+
+<table>
+    <tr>
+        <th text-align="center" colspan="2">{{ table_header }}</th>
+    </tr>
+    {% for key, value in stat_data_dic %}
+    <tr>
+        <td>{{ key }}</td><td>{{ value }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

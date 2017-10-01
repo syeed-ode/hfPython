@@ -58,7 +58,9 @@ border-collapse:    collapse;
 td, th {
 border:             thin dotted gray;
 }
-
+th{
+text-align:         center;
+}
 /*** Inputs ***/
 input[type=text] {
   font-size:        115%;

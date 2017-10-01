@@ -33,7 +33,7 @@ Available Functions:
 from flask import Flask, render_template, request
 from webapp.vsearch_local import search4letters
 from webapp.vsearchlog import log_request, read_log, read_unformatted_log
-from webapp.vsearchrepo import UseDatabase
+from webapp.vsearchrep import save_request, get_log, total_number_of_requests, highest_letters_requested
 
 
 app = Flask(__name__)
@@ -93,16 +93,56 @@ def do_view_log() -> 'html':
         from the vsearchlog module. Passes that content, other data, and
         'viewlog.html' to a flask template engine (which uses Jinja under
         the hood).
+
+       Returns:
+            'viewlog.html' with contents from logfile!!!
     """
     view_log_dict = dict(the_data=read_log()
                          , the_title='Current Log Data'
                          , the_row_titles=['Form Data'
-                                            , 'Remote Addr'
-                                            , 'User Agent'
-                                            , 'Results'
+                                           , 'Remote Addr'
+                                           , 'User Agent'
+                                           , 'Results'
                                            ]
                          )
     return render_template('viewlog.html', **view_log_dict)
+
+
+@app.route('/dataoutput')
+def do_get_data() -> 'html':
+    """Process the  /dataoutput' endpoint. It retrieves data from MySql and
+       populates the data in a html.
+
+       Returns:
+            'viewlog.html' with contents from database!!!
+    """
+    get_data_dict = dict(the_data=get_log()
+                         , the_title='Current Database State'
+                         , the_row_titles=['Phrase'
+                                           , 'Letters'
+                                           , 'Remote Addr'
+                                           , 'User Agent'
+                                           , 'Results'
+                                           ]
+                         )
+    return render_template('viewlog.html', **get_data_dict)
+
+
+@app.route('/stats')
+def get_statistics() -> 'html':
+    """Prints out the statistics that answer the questions:
+            how many answered requests
+
+       Returns:
+            'stats.html'
+    """
+    stat_data_dic=dict(total_number_of_requests=total_number_of_requests()
+                       ,most_selected_letters=highest_letters_requested())
+
+    statistics_dict = dict(the_title='This is the statistics for the SEARCH4LOG webapp'
+                           , table_header='Statistics'
+                           , stat_data_dic=stat_data_dic.items())
+    return render_template('stats.html', **statistics_dict)
 
 
 @app.route('/viewunformattedlog')
