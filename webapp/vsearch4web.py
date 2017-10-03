@@ -33,7 +33,8 @@ Available Functions:
 from flask import Flask, render_template, request
 from webapp.vsearch_local import search4letters
 from webapp.vsearchlog import log_request, read_log, read_unformatted_log
-from webapp.vsearchrep import save_request, get_log, total_number_of_requests, highest_letters_requested
+from webapp.vsearchrep import save_request, get_log, total_number_of_requests\
+                            , highest_letters_requested, most_frequent_browser_used
 
 
 app = Flask(__name__)
@@ -137,7 +138,8 @@ def get_statistics() -> 'html':
             'stats.html'
     """
     stat_data_dic=dict(total_number_of_requests=total_number_of_requests()
-                       ,most_selected_letters=highest_letters_requested())
+                       , most_selected_letters=highest_letters_requested()
+                       , most_frequent_browser_used=most_frequent_browser_used())
 
     statistics_dict = dict(the_title='This is the statistics for the SEARCH4LOG webapp'
                            , table_header='Statistics'

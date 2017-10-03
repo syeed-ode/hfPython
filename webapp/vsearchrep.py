@@ -11,9 +11,32 @@ Available Function:
     - highest_letters_requested:    Calculates the highest requestd letter
                                     matching and the number of times they
                                     were requested
+    - most_frequent_browser_used:   Calculates the most frequently used web
+                                    browser and returns which browser was
+                                    used and the number of times as a string
 """
 
 from webapp.vsearchdatasource import UseDatabase
+
+
+def most_frequent_browser_used() -> 'str':
+    """Calculates the most frequently used web browser and
+       returns which browser was used and the number of times
+       as a string
+
+       Returns:
+           A string of number,browser combo
+    """
+    _SQL = """select count(browser_string) as 'count', browser_string
+              from log
+              group by browser_string
+              order by count desc
+              limit 1
+           """
+    with UseDatabase() as cursor:
+        cursor.execute(_SQL)
+        dictionary_output = cursor.fetchall()[0]
+        return str(dictionary_output)
 
 
 def highest_letters_requested() -> 'str':
@@ -33,6 +56,7 @@ def highest_letters_requested() -> 'str':
         cursor.execute(_SQL)
         dictionary_output = cursor.fetchall()[0]
         return str(dictionary_output)
+
 
 def total_number_of_requests() -> 'int':
     """"Calculates the number of rows entered into the log database it
