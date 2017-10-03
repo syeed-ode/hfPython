@@ -30,14 +30,30 @@ Available Functions:
                     '/search4web' endpoint
 
 """
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session
 from webapp.vsearch_local import search4letters
+from webapp.checkvaliduser import verify_logged_in_user
 from webapp.vsearchlog import log_request, read_log, read_unformatted_log
 from webapp.vsearchrep import save_request, get_log, total_number_of_requests\
                             , highest_letters_requested, most_frequent_browser_used
 
 
 app = Flask(__name__)
+
+
+LOGGED_IN = 'logged_in'
+
+
+@app.route('/login')
+def do_login() -> str:
+    session[LOGGED_IN] = True
+    return 'you are logged in'
+
+
+@app.route('logout')
+def do_logout() -> str:
+    session.pop(LOGGED_IN)
+    return 'You are logged out'
 
 
 @app.route('/hello')
@@ -52,6 +68,7 @@ def hello() -> str:
 
 
 @app.route('/search4')
+@verify_logged_in_user
 def do_search() -> str:
     """Processes the '/search4' endpoint. Executes search4letters with
        defaulted input text of 'life, the universe, and everything in

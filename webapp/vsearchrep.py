@@ -19,7 +19,7 @@ Available Function:
 from webapp.vsearchdatasource import UseDatabase
 
 
-def most_frequent_browser_used() -> 'str':
+def most_frequent_browser_used() -> str:
     """Calculates the most frequently used web browser and
        returns which browser was used and the number of times
        as a string
@@ -39,7 +39,7 @@ def most_frequent_browser_used() -> 'str':
         return str(dictionary_output)
 
 
-def highest_letters_requested() -> 'str':
+def highest_letters_requested() -> str:
     """Calculates the highest requestd letter matching and the number
        of times they were requested
 
@@ -58,7 +58,7 @@ def highest_letters_requested() -> 'str':
         return str(dictionary_output)
 
 
-def total_number_of_requests() -> 'int':
+def total_number_of_requests() -> int:
     """"Calculates the number of rows entered into the log database it
         represents the number of successfully returned answers to each
         request.
@@ -73,7 +73,7 @@ def total_number_of_requests() -> 'int':
     return str(number_of_rows)
 
 
-def get_log() -> 'list':
+def get_log() -> list:
     """Polls the log table for its entries and returns the results
 
     Returns:
