@@ -51,6 +51,13 @@ def log_request(req: 'flask_request', res: str) -> None:
         print(req.form, req.remote_addr, req.user_agent, res, file=logger, sep='|')
 
 
+def log_entry(*args) -> None:
+    s = str(args)
+    print(s)
+    with open(FILE_NAME, 'a') as logger:
+        print(s, file=logger)
+
+
 def read_unformatted_log() -> str:
     """Reads the current log file and returns the results
 

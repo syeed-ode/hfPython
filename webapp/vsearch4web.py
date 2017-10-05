@@ -30,15 +30,19 @@ Available Functions:
                     '/search4web' endpoint
 
 """
-from flask import Flask, render_template, request, session
+from threading import Thread
+
+from flask import Flask, render_template, request, session, copy_current_request_context
 from webapp.vsearch_local import search4letters
 from webapp.checkvaliduser import verify_logged_in_user
-from webapp.vsearchlog import log_request, read_log, read_unformatted_log
+from webapp.vsearchexceptions import VSearchDataSourceError
+from webapp.vsearchlog import log_request, read_log, read_unformatted_log, log_entry
 from webapp.vsearchrep import save_request, get_log, total_number_of_requests\
                             , highest_letters_requested, most_frequent_browser_used
 
 
 app = Flask(__name__)
+app.secret_key = '4b722c96-3ab8-4b4a-9dda-3988c7802215'
 
 
 LOGGED_IN = 'logged_in'
@@ -50,7 +54,7 @@ def do_login() -> str:
     return 'you are logged in'
 
 
-@app.route('logout')
+@app.route('/logout')
 def do_logout() -> str:
     session.pop(LOGGED_IN)
     return 'You are logged out'
@@ -80,6 +84,7 @@ def do_search() -> str:
     return str(search4letters('life, the universe, and everything in between'))
 
 
+@app.route('/')
 @app.route('/entry')
 def do_entry() -> 'html':
     """Calls the 'entry.html' file in the template directory.  That file
@@ -92,11 +97,23 @@ def do_search_web() -> 'html':
     """Called from 'entry.html' this method calls the 'search4letters' and
        passes the correct result, and arguments to the 'results.html' file,
        a jinja2 template, rended by flaxk's render_template."""
+
+    @copy_current_request_context
+    def save_request_with_context(contexted_request: 'flask_request', contexted_result: str):
+        save_request(contexted_request, contexted_result)
+
     phrase = request.form['phrase']
     letters = request.form['letters']
     the_results = str(search4letters(phrase, letters))
     log_request(request, the_results)
-    save_request(request, the_results)
+
+    try:
+        t = Thread(target=save_request_with_context, args=(request, the_results))
+        t.start()
+        # save_request(request, the_results)
+    except VSearchDataSourceError as err:
+        log_entry('Could not save request to db: ', str(err))
+
     template_input = dict(the_phrase=phrase
                           , the_letters=letters
                           , the_results=the_results
@@ -127,6 +144,7 @@ def do_view_log() -> 'html':
 
 
 @app.route('/dataoutput')
+@verify_logged_in_user
 def do_get_data() -> 'html':
     """Process the  /dataoutput' endpoint. It retrieves data from MySql and
        populates the data in a html.
@@ -134,7 +152,16 @@ def do_get_data() -> 'html':
        Returns:
             'viewlog.html' with contents from database!!!
     """
-    get_data_dict = dict(the_data=get_log()
+    try:
+        log = get_log()
+    except VSearchDataSourceError as error:
+        log = str(error)
+        log_entry('Sorry received database error. ' + log)
+        error_dict = dict(the_title='Sorry received database error'
+                          , the_data=log)
+        return render_template('error.html', **error_dict)
+
+    get_data_dict = dict(the_data=log
                          , the_title='Current Database State'
                          , the_row_titles=['Phrase'
                                            , 'Letters'

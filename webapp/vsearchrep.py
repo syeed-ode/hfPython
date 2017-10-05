@@ -15,6 +15,7 @@ Available Function:
                                     browser and returns which browser was
                                     used and the number of times as a string
 """
+from time import sleep
 
 from webapp.vsearchdatasource import UseDatabase
 
@@ -88,6 +89,7 @@ def get_log() -> list:
 
 def save_request(req: 'flask request', res: str) -> None:
     """Store web reqeust in log database"""
+    sleep(15)
     _SQL = """insert into log (phrase, letters, ip, browser_string, results) 
               values (%s, %s, %s, %s, %s)"""
     with UseDatabase() as cursor:
